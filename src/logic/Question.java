@@ -6,6 +6,7 @@ public class Question
 	private String a;
 	private String b;
 	private String c;
+	private String d;
 	private String poprawne;
 
 	public Question() {
@@ -19,6 +20,11 @@ public class Question
 		this.poprawne = poprawne;
 	}
 
+	@Override
+	public String toString() {
+		return pytanie;
+	}
+	
 	public String getPytanie()
 	{
 		return pytanie;
@@ -50,6 +56,15 @@ public class Question
 	public void setC(String c)
 	{
 		this.c = c;
+	}
+	
+	public String getD()
+	{
+		return d;
+	}
+	public void setD(String d)
+	{
+		this.d = d;
 	}
 	public String getPoprawne()
 	{

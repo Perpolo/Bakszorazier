@@ -3,6 +3,8 @@ package gui;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import languages.Translator;
 import logic.Const;
@@ -11,10 +13,19 @@ import logic.Question;
 import logic.ReadJson;
 
 import javax.swing.JLabel;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
@@ -23,7 +34,11 @@ import javax.swing.JCheckBox;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
-import java.awt.Button;
+import javax.swing.JRadioButton;
+import javax.swing.JLayeredPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JScrollPane;
+import javax.swing.JList;
 
 public class MainFrame extends JFrame implements Translator, Const {
 	ListaPytan lp;
@@ -33,7 +48,7 @@ public class MainFrame extends JFrame implements Translator, Const {
 	JTextPane textPaneA;
 	JTextPane textPaneB;
 	JTextPane textPaneC;
-	JTextPane textUWAGI;
+	JTextPane textPaneD;
 
 	Question aktualnePytanie;
 	int aktualnyIndeks;
@@ -41,36 +56,50 @@ public class MainFrame extends JFrame implements Translator, Const {
 	// int wszystkie = 0;
 	int niepoprawne = 0;
 	int poprawne = 0;
-
-	JCheckBox chckbxPytaniaWKolejnosci;
 	JCheckBox chckbxNewCheckBox;
+	JList list;
+	JRadioButton rdbtnNewRadioButton_1;
 
 	public MainFrame() {
 		setResizable(false);
 		setTitle(APP_TITLE);
+		model = new DefaultListModel<Question>();
 		lp = ReadJson.getData();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 660, 351);
-		
+		setBounds(100, 100, 445, 397);
+
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
-		
-		JButton btnNewButton = new JButton("New button");
+
+		JButton btnNewButton = new JButton("Nastepne");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				nextQuestion();
+			}
+		});
 		btnNewButton.setIcon(null);
 		menuBar.add(btnNewButton);
-		
-		JButton btnNewButton_1 = new JButton("New button");
+
+		JButton btnNewButton_1 = new JButton("Odpowiedz");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setAnswer(aktualnePytanie.getPoprawne());
+			}
+		});
 		menuBar.add(btnNewButton_1);
-		
-		JMenu mnNewMenu = new JMenu("New menu");
-		menuBar.add(mnNewMenu);
-		
-		JMenuItem mntmWczytajDane = new JMenuItem("Wczytaj dane");
-		mnNewMenu.add(mntmWczytajDane);
-		
-		JMenuItem mntmNewMenuItem = new JMenuItem("New menu item");
-		mnNewMenu.add(mntmNewMenuItem);
+
+		chckbxNewCheckBox = new JCheckBox("Podgl\u0105d pyta\u0144");
+		menuBar.add(chckbxNewCheckBox);
+		chckbxNewCheckBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (chckbxNewCheckBox.isSelected()) {
+					setBounds(100, 100, 742, 397);
+				} else {
+					setBounds(100, 100, 445, 397);
+				}
+			}
+		});
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -86,12 +115,11 @@ public class MainFrame extends JFrame implements Translator, Const {
 				} else {
 					niepoprawne++;
 					setAnswer(aktualnePytanie.getPoprawne());
-					textUWAGI.setText("Poprawna odpowiedz to: " + aktualnePytanie.getPoprawne());
 				}
 				rf();
 			}
 		});
-		btnNewButtonA.setBounds(305, 172, 128, 37);
+		btnNewButtonA.setBounds(367, 85, 66, 37);
 		contentPane.add(btnNewButtonA);
 
 		JButton buttonB = new JButton("B");
@@ -104,13 +132,12 @@ public class MainFrame extends JFrame implements Translator, Const {
 				} else {
 					niepoprawne++;
 					setAnswer(aktualnePytanie.getPoprawne());
-					textUWAGI.setText("Poprawna odpowiedz to: " + aktualnePytanie.getPoprawne());
 				}
 				rf();
 			}
 
 		});
-		buttonB.setBounds(305, 220, 128, 37);
+		buttonB.setBounds(367, 133, 66, 37);
 		contentPane.add(buttonB);
 
 		JButton buttonC = new JButton("C");
@@ -122,104 +149,139 @@ public class MainFrame extends JFrame implements Translator, Const {
 				} else {
 					niepoprawne++;
 					setAnswer(aktualnePytanie.getPoprawne());
-					textUWAGI.setText("Poprawna odpowiedz to: " + aktualnePytanie.getPoprawne());
+
 				}
 				rf();
 			}
 		});
-		buttonC.setBounds(305, 268, 128, 37);
+		buttonC.setBounds(367, 181, 66, 37);
 		contentPane.add(buttonC);
-
-		JButton btnLosuj = new JButton("Nastepne");
-		btnLosuj.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-
-				nastepnePytanie();
-
-			}
-		});
-		btnLosuj.setBounds(10, 18, 89, 23);
-		contentPane.add(btnLosuj);
-
-		JButton btnOdpowiedz = new JButton("Odpowiedz");
-		btnOdpowiedz.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				setAnswer(aktualnePytanie.getPoprawne());
-				textUWAGI.setText("Poprawna odpowiedz to: " + aktualnePytanie.getPoprawne());
-			}
-		});
-		btnOdpowiedz.setBounds(109, 18, 109, 23);
-		contentPane.add(btnOdpowiedz);
 
 		txlblPytanie = new JTextPane();
 		txlblPytanie.setEditable(false);
 		txlblPytanie.setText("lblPytanie");
-		txlblPytanie.setBounds(10, 89, 423, 72);
+		txlblPytanie.setBounds(10, 7, 423, 72);
 		contentPane.add(txlblPytanie);
 
 		textPaneA = new JTextPane();
-		textPaneA.setBounds(10, 172, 288, 37);
+		textPaneA.setBounds(10, 85, 347, 37);
 		contentPane.add(textPaneA);
 
 		textPaneB = new JTextPane();
-		textPaneB.setBounds(10, 220, 288, 37);
+		textPaneB.setBounds(10, 133, 347, 37);
 		contentPane.add(textPaneB);
 
 		textPaneC = new JTextPane();
-		textPaneC.setBounds(10, 268, 288, 37);
+		textPaneC.setBounds(10, 181, 347, 37);
 		contentPane.add(textPaneC);
 
-		textUWAGI = new JTextPane();
-		textUWAGI.setForeground(Color.RED);
-		textUWAGI.setBounds(10, 52, 208, 26);
-		contentPane.add(textUWAGI);
+		textPaneD = new JTextPane();
+		textPaneD.setBounds(10, 229, 347, 37);
+		contentPane.add(textPaneD);
+
+		JButton buttonD = new JButton("D");
+		buttonD.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (aktualnePytanie.getPoprawne().equals("d")) {
+					poprawne++;
+					nastepnePytanie();
+				} else {
+					niepoprawne++;
+					setAnswer(aktualnePytanie.getPoprawne());
+				}
+				rf();
+			}
+		});
+		buttonD.setBounds(367, 229, 66, 37);
+		contentPane.add(buttonD);
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(443, 7, 293, 335);
+		contentPane.add(scrollPane);
+
+		list = new JList(model);
+		list.addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				JList list = (JList) e.getSource();
+
+				aktualnePytanie = lp.lp.get(list.getSelectedIndex());
+
+				txlblPytanie.setText(aktualnePytanie.getPytanie());
+				textPaneA.setText(aktualnePytanie.getA());
+				textPaneB.setText(aktualnePytanie.getB());
+				textPaneC.setText(aktualnePytanie.getC());
+				textPaneD.setText(aktualnePytanie.getD());
+				rf();
+				setAnswer(EMPTY);
+			}
+		});
+		// list.addMouseListener(new MouseAdapter() {
+		// public void mouseClicked(MouseEvent evt) {
+		// JList list = (JList) evt.getSource();
+		//
+		// aktualnePytanie = lp.lp.get(list.getSelectedIndex());
+		//
+		// txlblPytanie.setText(aktualnePytanie.getPytanie());
+		// textPaneA.setText(aktualnePytanie.getA());
+		// textPaneB.setText(aktualnePytanie.getB());
+		// textPaneC.setText(aktualnePytanie.getC());
+		//
+		// rf();
+		//
+		// }
+		// });
+		scrollPane.setViewportView(list);
 
 		lblWszystkieOpowiedzi = new JLabel("Wszystkie opowiedzi:");
-		lblWszystkieOpowiedzi.setBounds(228, 40, 129, 19);
+		lblWszystkieOpowiedzi.setBounds(10, 277, 135, 14);
 		contentPane.add(lblWszystkieOpowiedzi);
 
 		lblProcentPoprawnych = new JLabel("Procent poprawnych:");
-		lblProcentPoprawnych.setBounds(228, 60, 129, 23);
+		lblProcentPoprawnych.setBounds(10, 302, 135, 14);
 		contentPane.add(lblProcentPoprawnych);
 
 		lblWszystkie = new JLabel("New label");
-		lblWszystkie.setBounds(366, 42, 46, 14);
+		lblWszystkie.setBounds(155, 277, 46, 14);
 		contentPane.add(lblWszystkie);
 
 		label = new JLabel("New label");
-		label.setBounds(367, 64, 46, 14);
+		label.setBounds(155, 302, 46, 14);
 		contentPane.add(label);
 
-		chckbxPytaniaWKolejnosci = new JCheckBox("w kolejnosci / losowo");
-		chckbxPytaniaWKolejnosci.setBounds(224, 18, 128, 23);
-		contentPane.add(chckbxPytaniaWKolejnosci);
+		rdbtnNewRadioButton_1 = new JRadioButton("W kolejno\u015Bci");
+		rdbtnNewRadioButton_1.setBounds(299, 298, 114, 23);
+		rdbtnNewRadioButton_1.setSelected(true);
 
-		chckbxNewCheckBox = new JCheckBox("Ustawienia zaawansowane");
-		chckbxNewCheckBox.setBounds(361, 18, 74, 23);
-		chckbxNewCheckBox.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (chckbxNewCheckBox.isSelected()) {
-					setBounds(100, 100, 630, 351);
-				} else {
-					setBounds(100, 100, 446, 351);
-				}
-			}
-		});
-		contentPane.add(chckbxNewCheckBox);
+		JRadioButton rdbtnNewRadioButton = new JRadioButton("Losowo");
+		rdbtnNewRadioButton.setBounds(299, 273, 82, 23);
 		nastepnePytanie();
+
+		ButtonGroup bg = new ButtonGroup();
+		bg.add(rdbtnNewRadioButton_1);
+		bg.add(rdbtnNewRadioButton);
+
+		contentPane.add(rdbtnNewRadioButton_1);
+		contentPane.add(rdbtnNewRadioButton);
+		repaintList();
 	}
 
-	int kolejkaTestow = 0;
+	int kolejkaTestow = -1;
 	private JLabel lblWszystkieOpowiedzi;
 	private JLabel lblProcentPoprawnych;
 	private JLabel lblWszystkie;
 	private JLabel label;
 	private JMenuBar menuBar;
 
+	DefaultListModel<Question> model;
+
 	private void nastepnePytanie() {
-		if (!chckbxPytaniaWKolejnosci.isSelected()) {
+		nextQuestion();
+	}
+
+	private void nextQuestion() {
+		if (rdbtnNewRadioButton_1.isSelected()) {
 			kolejkaTestow++;
 			if (kolejkaTestow < lp.lp.size()) {
 				aktualnePytanie = lp.lp.get(kolejkaTestow);
@@ -228,12 +290,12 @@ public class MainFrame extends JFrame implements Translator, Const {
 				textPaneA.setText(aktualnePytanie.getA());
 				textPaneB.setText(aktualnePytanie.getB());
 				textPaneC.setText(aktualnePytanie.getC());
-				textUWAGI.setText("");
+				textPaneD.setText(aktualnePytanie.getD());
 
 				rf();
 
 			} else {
-				kolejkaTestow = 1;
+				kolejkaTestow = 0;
 				nastepnePytanie();
 			}
 		} else {
@@ -246,7 +308,7 @@ public class MainFrame extends JFrame implements Translator, Const {
 			textPaneA.setText(aktualnePytanie.getA());
 			textPaneB.setText(aktualnePytanie.getB());
 			textPaneC.setText(aktualnePytanie.getC());
-			textUWAGI.setText("");
+			textPaneD.setText(aktualnePytanie.getD());
 
 			rf();
 		}
@@ -261,28 +323,48 @@ public class MainFrame extends JFrame implements Translator, Const {
 			textPaneA.setForeground(Color.GREEN);
 			textPaneB.setForeground(Color.RED);
 			textPaneC.setForeground(Color.RED);
+			textPaneD.setForeground(Color.RED);
 		}
 			break;
 		case ANS_B: {
 			textPaneA.setForeground(Color.RED);
 			textPaneB.setForeground(Color.GREEN);
 			textPaneC.setForeground(Color.RED);
+			textPaneD.setForeground(Color.RED);
 		}
 			break;
 		case ANS_C: {
 			textPaneA.setForeground(Color.RED);
 			textPaneB.setForeground(Color.RED);
 			textPaneC.setForeground(Color.GREEN);
+			textPaneD.setForeground(Color.RED);
 		}
 			break;
-		default:{
+		case ANS_D: {
+			textPaneA.setForeground(Color.RED);
+			textPaneB.setForeground(Color.RED);
+			textPaneC.setForeground(Color.RED);
+			textPaneD.setForeground(Color.GREEN);
+		}
+			break;
+		default: {
 			textPaneA.setForeground(Color.BLACK);
 			textPaneB.setForeground(Color.BLACK);
 			textPaneC.setForeground(Color.BLACK);
+			textPaneD.setForeground(Color.BLACK);
 		}
 			break;
 		}
 
+	}
+
+	private void repaintList() {
+
+		model.clear();
+
+		for (Question p : lp.lp) {
+			model.addElement(p);
+		}
 	}
 
 	private void rf() {

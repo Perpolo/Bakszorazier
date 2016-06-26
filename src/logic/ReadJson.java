@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 
 public class ReadJson
 {
-	private static final String filePath = "pytaniaSip.json";
+	private static final String filePath = "tsst.json";
 	public ReadJson()
 	{
 
